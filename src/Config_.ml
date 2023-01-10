@@ -72,36 +72,37 @@ let getBool s map =
   | _ -> None
 
 let getString s map =
-  match map |> getOpt s with Some (Str {str}) -> str | _ -> ""
+  match map |> getOpt s with Some (Str { str }) -> str | _ -> ""
 
 let getStringOption s map =
-  match map |> getOpt s with Some (Str {str}) -> Some str | _ -> None
+  match map |> getOpt s with Some (Str { str }) -> Some str | _ -> None
 
 let getShims map =
   let shims = ref [] in
   (match map |> getOpt "shims" with
-  | Some (Obj {map = shimsMap}) ->
-    shimsMap
-    |> String_map.iter (fun fromModule toModule ->
-           match toModule with
-           | Ext_json_types.Str {str} -> shims := (fromModule, str) :: !shims
-           | _ -> ())
-  | Some (Arr {content}) ->
-    (* To be deprecated: array of strings *)
-    content
-    |> Array.iter (fun x ->
-           match x with
-           | Ext_json_types.Str {str} ->
-             let fromTo = Str.split (Str.regexp "=") str |> Array.of_list in
-             assert (Array.length fromTo == 2);
-             shims := (fromTo.(0), fromTo.(1)) :: !shims
-           | _ -> ())
+  | Some (Obj { map = shimsMap }) ->
+      shimsMap
+      |> String_map.iter (fun fromModule toModule ->
+             match toModule with
+             | Ext_json_types.Str { str } ->
+                 shims := (fromModule, str) :: !shims
+             | _ -> ())
+  | Some (Arr { content }) ->
+      (* To be deprecated: array of strings *)
+      content
+      |> Array.iter (fun x ->
+             match x with
+             | Ext_json_types.Str { str } ->
+                 let fromTo = Str.split (Str.regexp "=") str |> Array.of_list in
+                 assert (Array.length fromTo == 2);
+                 shims := (fromTo.(0), fromTo.(1)) :: !shims
+             | _ -> ())
   | _ -> ());
   !shims
 
 let setDebug ~gtconf =
   match gtconf |> getOpt "debug" with
-  | Some (Obj {map}) -> map |> String_map.iter Debug.setItem
+  | Some (Obj { map }) -> map |> String_map.iter Debug.setItem
   | _ -> ()
 
 let readConfig ~bsVersion ~getBsConfigFile ~namespace =
@@ -135,8 +136,8 @@ let readConfig ~bsVersion ~getBsConfigFile ~namespace =
     let module_ =
       let packageSpecsModuleString =
         match bsconf |> getOpt "package-specs" with
-        | Some (Obj {map = packageSpecs}) ->
-          packageSpecs |> getStringOption "module"
+        | Some (Obj { map = packageSpecs }) ->
+            packageSpecs |> getStringOption "module"
         | _ -> None
       in
       (* Give priority to gentypeconfig, followed by package-specs *)
@@ -166,17 +167,17 @@ let readConfig ~bsVersion ~getBsConfigFile ~namespace =
       match bsVersion with
       | None -> (0, 0, 0)
       | Some s -> (
-        match s |> Str.split (Str.regexp (Str.quote ".")) with
-        | x1 :: x2 :: x3 :: _ ->
-          let v1 = int_of_string x1 in
-          let v2 = int_of_string x2 in
-          let v3 =
-            match x3 |> Str.split (Str.regexp "-") with
-            | x3 :: _ -> int_of_string x3
-            | _ -> 0
-          in
-          (v1, v2, v3)
-        | _ -> (0, 0, 0))
+          match s |> Str.split (Str.regexp (Str.quote ".")) with
+          | x1 :: x2 :: x3 :: _ ->
+              let v1 = int_of_string x1 in
+              let v2 = int_of_string x2 in
+              let v3 =
+                match x3 |> Str.split (Str.regexp "-") with
+                | x3 :: _ -> int_of_string x3
+                | _ -> 0
+              in
+              (v1, v2, v3)
+          | _ -> (0, 0, 0))
     in
     let externalStdlib = bsconf |> getStringOption "external-stdlib" in
     let v1, v2, v3 = bsVersion in
@@ -210,14 +211,14 @@ let readConfig ~bsVersion ~getBsConfigFile ~namespace =
     in
     let bsDependencies =
       match bsconf |> getOpt "bs-dependencies" with
-      | Some (Arr {content}) ->
-        let strings = ref [] in
-        content
-        |> Array.iter (fun x ->
-               match x with
-               | Ext_json_types.Str {str} -> strings := str :: !strings
-               | _ -> ());
-        !strings
+      | Some (Arr { content }) ->
+          let strings = ref [] in
+          content
+          |> Array.iter (fun x ->
+                 match x with
+                 | Ext_json_types.Str { str } -> strings := str :: !strings
+                 | _ -> ());
+          !strings
       | _ -> default.bsDependencies
     in
     let sources =
@@ -247,13 +248,13 @@ let readConfig ~bsVersion ~getBsConfigFile ~namespace =
   in
   match getBsConfigFile () with
   | Some bsConfigFile -> (
-    try
-      let json = bsConfigFile |> Ext_json_parse.parse_json_from_file in
-      match json with
-      | Obj {map = bsconf} -> (
-        match bsconf |> getOpt "gentypeconfig" with
-        | Some (Obj {map = gtconf}) -> parseConfig ~bsconf ~gtconf
-        | _ -> default)
-      | _ -> default
-    with _ -> default)
+      try
+        let json = bsConfigFile |> Ext_json_parse.parse_json_from_file in
+        match json with
+        | Obj { map = bsconf } -> (
+            match bsconf |> getOpt "gentypeconfig" with
+            | Some (Obj { map = gtconf }) -> parseConfig ~bsconf ~gtconf
+            | _ -> default)
+        | _ -> default
+      with _ -> default)
   | None -> default

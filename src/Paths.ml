@@ -87,9 +87,9 @@ let relativePathFromBsLib fileName =
     let rec pathToList path =
       let isRoot = path |> Filename.basename = path in
       match isRoot with
-      | true -> [path]
+      | true -> [ path ]
       | false ->
-        (path |> Filename.basename) :: (path |> Filename.dirname |> pathToList)
+          (path |> Filename.basename) :: (path |> Filename.dirname |> pathToList)
     in
     let rec fromLibBs ~acc reversedList =
       match reversedList with

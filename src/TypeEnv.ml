@@ -1,6 +1,6 @@
 open GenTypeCommon
 
-type moduleEquation = {internal : bool; dep : dep}
+type moduleEquation = { internal : bool; dep : dep }
 
 type t = {
   mutable componentModuleItem : Runtime.moduleItem;
@@ -29,7 +29,6 @@ let createTypeEnv ~name parent =
   }
 
 let root () = None |> createTypeEnv ~name:"__root__"
-
 let toString typeEnv = typeEnv.name
 
 let newModule ~name typeEnv =
@@ -60,11 +59,11 @@ let getModule ~name typeEnv =
 
 let expandAliasToExternalModule ~name typeEnv =
   match typeEnv |> getModule ~name with
-  | Some {moduleEquation = Some {internal = false; dep}} ->
-    if !Debug.typeEnv then
-      Log_.item "TypeEnv.expandAliasToExternalModule %s %s aliased to %s\n"
-        (typeEnv |> toString) name (dep |> depToString);
-    Some dep
+  | Some { moduleEquation = Some { internal = false; dep } } ->
+      if !Debug.typeEnv then
+        Log_.item "TypeEnv.expandAliasToExternalModule %s %s aliased to %s\n"
+          (typeEnv |> toString) name (dep |> depToString);
+      Some dep
   | _ -> None
 
 let addModuleEquation ~dep ~internal typeEnv =
@@ -72,26 +71,26 @@ let addModuleEquation ~dep ~internal typeEnv =
     Log_.item "Typenv.addModuleEquation %s %s dep:%s\n" (typeEnv |> toString)
       (match internal with true -> "Internal" | false -> "External")
       (dep |> depToString);
-  typeEnv.moduleEquation <- Some {internal; dep}
+  typeEnv.moduleEquation <- Some { internal; dep }
 
 let rec addTypeEquation ~flattened ~type_ typeEnv =
   match flattened with
-  | [name] ->
-    {
-      typeEnv with
-      typeEquations = typeEnv.typeEquations |> StringMap.add name type_;
-    }
-  | moduleName :: rest -> (
-    match typeEnv |> getModule ~name:moduleName with
-    | Some typeEnv1 ->
+  | [ name ] ->
       {
         typeEnv with
-        map =
-          typeEnv.map
-          |> StringMap.add moduleName
-               (Module (typeEnv1 |> addTypeEquation ~flattened:rest ~type_));
+        typeEquations = typeEnv.typeEquations |> StringMap.add name type_;
       }
-    | None -> typeEnv)
+  | moduleName :: rest -> (
+      match typeEnv |> getModule ~name:moduleName with
+      | Some typeEnv1 ->
+          {
+            typeEnv with
+            map =
+              typeEnv.map
+              |> StringMap.add moduleName
+                   (Module (typeEnv1 |> addTypeEquation ~flattened:rest ~type_));
+          }
+      | None -> typeEnv)
   | [] -> typeEnv
 
 let addTypeEquations ~typeEquations typeEnv =
@@ -105,54 +104,54 @@ let addTypeEquations ~typeEquations typeEnv =
 let applyTypeEquations ~config ~path typeEnv =
   match path with
   | Path.Pident id -> (
-    match typeEnv.typeEquations |> StringMap.find (id |> Ident.name) with
-    | type_ ->
-      if !Debug.typeResolution then
-        Log_.item "Typenv.applyTypeEquations %s name:%s type_:%s\n"
-          (typeEnv |> toString) (id |> Ident.name)
-          (type_
-          |> EmitType.typeToString ~config ~typeNameIsInterface:(fun _ -> false)
-          );
-      Some type_
-    | exception Not_found -> None)
+      match typeEnv.typeEquations |> StringMap.find (id |> Ident.name) with
+      | type_ ->
+          if !Debug.typeResolution then
+            Log_.item "Typenv.applyTypeEquations %s name:%s type_:%s\n"
+              (typeEnv |> toString) (id |> Ident.name)
+              (type_
+              |> EmitType.typeToString ~config ~typeNameIsInterface:(fun _ ->
+                     false));
+          Some type_
+      | exception Not_found -> None)
   | _ -> None
 
 let rec lookup ~name typeEnv =
   match typeEnv.map |> StringMap.find name with
   | _ -> Some typeEnv
   | exception Not_found -> (
-    match typeEnv.parent with
-    | None -> None
-    | Some parent -> parent |> lookup ~name)
+      match typeEnv.parent with
+      | None -> None
+      | Some parent -> parent |> lookup ~name)
 
 let rec lookupModuleType ~path typeEnv =
   match path with
-  | [moduleTypeName] -> (
-    if !Debug.typeEnv then
-      Log_.item "Typenv.lookupModuleType %s moduleTypeName:%s\n"
-        (typeEnv |> toString) moduleTypeName;
-    match typeEnv.mapModuleTypes |> StringMap.find moduleTypeName with
-    | x -> Some x
-    | exception Not_found -> (
-      match typeEnv.parent with
-      | None -> None
-      | Some parent -> parent |> lookupModuleType ~path))
+  | [ moduleTypeName ] -> (
+      if !Debug.typeEnv then
+        Log_.item "Typenv.lookupModuleType %s moduleTypeName:%s\n"
+          (typeEnv |> toString) moduleTypeName;
+      match typeEnv.mapModuleTypes |> StringMap.find moduleTypeName with
+      | x -> Some x
+      | exception Not_found -> (
+          match typeEnv.parent with
+          | None -> None
+          | Some parent -> parent |> lookupModuleType ~path))
   | moduleName :: path1 -> (
-    if !Debug.typeEnv then
-      Log_.item "Typenv.lookupModuleType %s moduleName:%s\n"
-        (typeEnv |> toString) moduleName;
-    match typeEnv.map |> StringMap.find moduleName with
-    | Module typeEnv1 -> typeEnv1 |> lookupModuleType ~path:path1
-    | Type _ -> None
-    | exception Not_found -> (
-      match typeEnv.parent with
-      | None -> None
-      | Some parent -> parent |> lookupModuleType ~path))
+      if !Debug.typeEnv then
+        Log_.item "Typenv.lookupModuleType %s moduleName:%s\n"
+          (typeEnv |> toString) moduleName;
+      match typeEnv.map |> StringMap.find moduleName with
+      | Module typeEnv1 -> typeEnv1 |> lookupModuleType ~path:path1
+      | Type _ -> None
+      | exception Not_found -> (
+          match typeEnv.parent with
+          | None -> None
+          | Some parent -> parent |> lookupModuleType ~path))
   | [] -> None
 
 let rec pathToList path =
   match path with
-  | Path.Pident id -> [id |> Ident.name]
+  | Path.Pident id -> [ id |> Ident.name ]
   | Path.Pdot (p, s, _) -> s :: (p |> pathToList)
   | Path.Papply _ -> []
 
@@ -172,7 +171,7 @@ let rec addModulePath ~typeEnv name =
   match typeEnv.parent with
   | None -> name |> ResolvedName.fromString
   | Some parent ->
-    typeEnv.name |> addModulePath ~typeEnv:parent |> ResolvedName.dot name
+      typeEnv.name |> addModulePath ~typeEnv:parent |> ResolvedName.dot name
 
 let rec getModuleEquations typeEnv : ResolvedName.eq list =
   let subEquations =
@@ -185,21 +184,23 @@ let rec getModuleEquations typeEnv : ResolvedName.eq list =
   in
   match (typeEnv.moduleEquation, typeEnv.parent) with
   | None, _ | _, None -> subEquations
-  | Some {dep}, Some parent ->
-    [(dep |> depToResolvedName, typeEnv.name |> addModulePath ~typeEnv:parent)]
+  | Some { dep }, Some parent ->
+      [
+        (dep |> depToResolvedName, typeEnv.name |> addModulePath ~typeEnv:parent);
+      ]
 
 let getModuleAccessPath ?(component = false) ~name typeEnv =
   let rec accessPath typeEnv =
     match typeEnv.parent with
     | None -> Runtime.Root name (* not nested *)
     | Some parent ->
-      Dot
-        ( (match parent.parent = None with
-          | true -> Root typeEnv.name
-          | false -> parent |> accessPath),
-          match component with
-          | true -> typeEnv.componentModuleItem
-          | false -> typeEnv.moduleItem )
+        Dot
+          ( (match parent.parent = None with
+            | true -> Root typeEnv.name
+            | false -> parent |> accessPath),
+            match component with
+            | true -> typeEnv.componentModuleItem
+            | false -> typeEnv.moduleItem )
   in
 
   typeEnv |> accessPath
