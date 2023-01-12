@@ -375,9 +375,7 @@ let emitExportConst_ ~early ?(comment = "") ~config ?(docString = "") ~emitters
   ^
   match (config.module_, config.language) with
   | _, TypeScript | ES6, _ ->
-      "export const "
-      ^ (name |> ofType ~config ~typeNameIsInterface ~type_)
-      ^ " = " ^ line
+      "export const " ^ (name |> ofType ~config ~typeNameIsInterface ~type_)
   | CommonJS, _ ->
       "const "
       ^ (name |> ofType ~config ~typeNameIsInterface ~type_)
