@@ -1,16 +1,16 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import App from "./App";
-import * as ImportJsValue from "./ImportJsValue.gen";
-import * as Uncurried from "./Uncurried.gen";
+import * as ImportJsValue from "./ImportJsValue.bs";
+import * as Uncurried from "./Uncurried.bs";
 import "./index.css";
 import * as MyMath from "./MyMath";
-import * as Types from "./nested/Types.gen";
-import { Universe_Nested2_Nested3_nested3Value } from "./NestedModules.gen";
-import * as Records from "./Records.gen";
-import * as Variants from "./Variants.gen";
-import Hooks from "./Hooks.gen";
-import * as DocStrings from "./Docstrings.gen";
+import * as Types from "./nested/Types.bs";
+import { Universe_Nested2_Nested3_nested3Value } from "./NestedModules.bs";
+import * as Records from "./Records.bs";
+import * as Variants from "./Variants.bs";
+import Hooks from "./Hooks.bs";
+import * as DocStrings from "./Docstrings.bs";
 import {
   printManyPayloads,
   printVariantWithPayload,
@@ -18,8 +18,8 @@ import {
   testManyPayloads,
   testVariantWithPayloads,
   testWithPayload,
-} from "./VariantsWithPayload.gen";
-import * as TestPromise from "./TestPromise.gen";
+} from "./VariantsWithPayload.bs";
+import * as TestPromise from "./TestPromise.bs";
 
 // tslint:disable-next-line:no-console
 const consoleLog = console.log;
@@ -87,12 +87,9 @@ consoleLog("Enums: fortytwoOK is", Variants.fortytwoOK);
 consoleLog("Enums: fortytwoBAD is", Variants.fortytwoBAD);
 consoleLog(
   "Variants: testConvert3to2('module') =",
-  Variants.testConvert2to3('module')
+  Variants.testConvert2to3("module")
 );
-consoleLog(
-  "Variants: testConvert3to2('42') =",
-  Variants.testConvert2to3('42')
-);
+consoleLog("Variants: testConvert3to2('42') =", Variants.testConvert2to3("42"));
 
 const absoluteValueInstance = new MyMath.AbsoluteValue();
 absoluteValueInstance.prop = -3;
