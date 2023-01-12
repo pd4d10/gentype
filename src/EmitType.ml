@@ -43,7 +43,7 @@ let generatedFilesExtension ~config =
   | Some s ->
       (* from .foo.bar to .foo *)
       Filename.remove_extension s
-  | None -> ".gen"
+  | None -> ".bs"
 
 let outputFileSuffix ~config =
   match config.generatedFileExtension with
@@ -51,7 +51,7 @@ let outputFileSuffix ~config =
   | _ -> (
       match config.language with
       | Flow | Untyped -> generatedFilesExtension ~config ^ ".js"
-      | TypeScript -> generatedFilesExtension ~config ^ ".tsx")
+      | TypeScript -> generatedFilesExtension ~config ^ ".d.ts")
 
 let generatedModuleExtension ~config = generatedFilesExtension ~config
 
